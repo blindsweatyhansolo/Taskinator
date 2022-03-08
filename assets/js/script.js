@@ -10,6 +10,7 @@ var taskFormHandler = function(event) {
     var taskTypeInput = document.querySelector("select[name='task-type']").value;
     
     // form validation for empty strings (here ! (not) is checking if variable is falsy)
+    // can also be (taskNameInput === "" || taskTypeInput === "")
     if (!taskNameInput || !taskTypeInput) {
         alert("Must fill out the task form!");
         return false;
@@ -17,6 +18,10 @@ var taskFormHandler = function(event) {
 
     // reset form to default upon submission
     formEl.reset();
+
+    // // reset form fields for next task to be entered
+    // document.querySelector("input[name='task-name']").value = "";
+    // document.querySelector("select[name='task-type']").selectedIndex = 0;
 
     // package up data as an object
     var taskDataObj = {
@@ -28,7 +33,7 @@ var taskFormHandler = function(event) {
     createTaskEl(taskDataObj);
 };
 
-// function to create new task using values from taskFormHandler
+// function to create new task using object values from taskFormHandler
 var createTaskEl = function(taskDataObj) {
     // create list item, with class name
     var listItemEl = document.createElement("li");
