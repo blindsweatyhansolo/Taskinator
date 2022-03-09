@@ -47,10 +47,6 @@ var taskFormHandler = function(event) {
 
 // function to create new task using object values from taskFormHandler
 var createTaskEl = function(taskDataObj) {
-
-    console.log(taskDataObj);
-    console.log(taskDataObj.status);
-
     // create list item, with class name
     // add task id as custom attribute
     var listItemEl = document.createElement("li");
@@ -67,6 +63,9 @@ var createTaskEl = function(taskDataObj) {
     // use taskIdCounter to create the id for taskDataObj, push into [tasks] object array
     taskDataObj.id = taskIdCounter;
     tasks.push(taskDataObj);
+
+    // call function to save task to localStorage
+    saveTasks();
 
     // set taskActionsEl to createTaskActions function with argument of
     // taskIdCounter to correspond with the current task id, add to list item
@@ -145,6 +144,9 @@ var completeEditTask = function(taskName, taskType, taskId) {
         }
     };
 
+    // call function to save task to localStorage
+    saveTasks();
+
     // alert success, reset form
     alert("Task updated!");
     formEl.removeAttribute("data-task-id");
@@ -198,6 +200,8 @@ var taskStatusChangeHandler = function(event) {
         }
     }
 
+    // call function to save task to localStorage
+    saveTasks();
 };
 
 // function to edit a task, with taskId as argument from taskButtonHandler()
@@ -237,8 +241,16 @@ var deleteTask = function(taskId) {
 
     // reassign tasks array to be same as updatedTaskArr
     tasks = updatedTaskArr;
+
+    // call function to save task to localStorage
+    saveTasks();
 };
-    
+  
+// function to save tasks to localStorage, executes everytime a task is added, updated or deleted
+var saveTasks = function() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
 // create new task on SUBMIT event on form that calls taskFormHandler()
 formEl.addEventListener("submit", taskFormHandler);
 
