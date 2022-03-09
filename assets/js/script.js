@@ -4,7 +4,7 @@ var formEl = document.querySelector("#task-form");
 var tasksToDoEl = document.querySelector("#tasks-to-do");
 var pageContentEl = document.querySelector("#page-content");
 
-// function to collect form's values, package into an object, and pass into createTaskEl function
+// function to collect form's values, package into an object, and pass into createTaskEl function on SUBMIT
 var taskFormHandler = function(event) {
     // prevents the default browser action of refreshing page when form is submitted
     event.preventDefault();
@@ -22,14 +22,21 @@ var taskFormHandler = function(event) {
     // reset form to default upon submission
     formEl.reset();
 
-    // package up data as an object
-    var taskDataObj = {
-        name: taskNameInput,
-        type: taskTypeInput
-    };
-    
-    // send above as argument to createTaskEl function
-    createTaskEl(taskDataObj);
+    var isEdit = formEl.hasAttribute("data-task-id");
+
+        // if isEdit has data attribute (true), get task id and call function to complete edit process
+    if (isEdit) {
+        var taskId = formEl.getAttribute("data-task-id");
+        completeEditTask(taskNameInput, taskTypeInput, taskId);
+    }
+        // no data attribute (false), package up data as object and pass to createTaskEl()
+    else {
+        var taskDataObj = {
+            name: taskNameInput,
+            type: taskTypeInput
+        };
+        createTaskEl(taskDataObj);
+    }
 };
 
 // function to create new task using object values from taskFormHandler
@@ -105,6 +112,20 @@ var createTaskActions = function(taskId) {
 
 };
 
+var completeEditTask = function(taskName, taskType, taskId) {
+    // find matching task list item
+    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+
+    // set new name and type values
+    taskSelected.querySelector("h3.task-name").textContent = taskName;
+    taskSelected.querySelector("span.task-type").textContent = taskType;
+
+    // alert success, reset form
+    alert("Task updated!");
+    formEl.removeAttribute("data-task-id");
+    document.querySelector("#save-task").textContent = "Add Task";
+};
+
 // function to match edit or delete element when a button is targeted, by way
 // of matching the elements class name and attribute (data-task-id #), then returning
 // variable taskId as argument for matching function 
@@ -145,6 +166,7 @@ var editTask = function(taskId) {
     // change #save-task button to "Save Task" from "Add Task" to show a user is in edit mode
     document.querySelector("#save-task").textContent = "Save Task";
 
+    // load task's attributes to form to show which task is being edited
     formEl.setAttribute("data-task-id", taskId);
 };
 
