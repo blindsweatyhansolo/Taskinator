@@ -1,6 +1,8 @@
+var taskIdCounter = 0;
+// create variables by searching their matching id names in the DOM
 var formEl = document.querySelector("#task-form");
 var tasksToDoEl = document.querySelector("#tasks-to-do");
-var taskIdCounter = 0;
+var pageContentEl = document.querySelector("#page-content");
 
 // function to collect form's values, package into an object, and pass into createTaskEl function
 var taskFormHandler = function(event) {
@@ -35,7 +37,6 @@ var createTaskEl = function(taskDataObj) {
     // create list item, with class name
     var listItemEl = document.createElement("li");
     listItemEl.className = "task-item";
-
     // add task id as custom attribute
     listItemEl.setAttribute("data-task-id", taskIdCounter);
     
@@ -50,7 +51,6 @@ var createTaskEl = function(taskDataObj) {
     // taskIdCounter to correspond with the current task id, add to list item
     var taskActionsEl = createTaskActions(taskIdCounter);
     listItemEl.appendChild(taskActionsEl);
-
     // add entire list item to list
     tasksToDoEl.appendChild(listItemEl);
 
@@ -68,7 +68,7 @@ var createTaskActions = function(taskId) {
     var editButtonEl = document.createElement("button");
     editButtonEl.textContent = "Edit";
     editButtonEl.className = "btn edit-btn";
-    editButtonEl.setAttribute = ("data-task-id", taskId);
+    editButtonEl.setAttribute("data-task-id", taskId);
     // add new edit button to container
     actionContainerEl.appendChild(editButtonEl);
 
@@ -76,15 +76,15 @@ var createTaskActions = function(taskId) {
     var deleteButtonEl = document.createElement("button");
     deleteButtonEl.textContent = "Delete";
     deleteButtonEl.className = "btn delete-btn";
-    deleteButtonEl.setAttribute = ("data-task-id", taskId);
+    deleteButtonEl.setAttribute("data-task-id", taskId);
     // add new delete button to container
     actionContainerEl.appendChild(deleteButtonEl);
 
     // create (select) status dropdown with class name, multiple attributes
     var statusSelectEl = document.createElement("select");
     statusSelectEl.className = "select-status";
-    statusSelectEl.setAttribute = ("name", "status-change");
-    statusSelectEl.setAttribute = ("data-task-id", taskId);
+    statusSelectEl.setAttribute("name", "status-change");
+    statusSelectEl.setAttribute("data-task-id", taskId);
     
     // create (option) array for dropdown, use for loop to create new option with text
     // and attributes, then append to (select) status dropdown
@@ -105,6 +105,50 @@ var createTaskActions = function(taskId) {
 
 };
 
+// function to match edit or delete element when a button is targeted, by way
+// of matching the elements class name and attribute (data-task-id #), then returning
+// variable taskId as argument for matching function 
+var taskButtonHandler = function(event) {
+    // get target element from event
+    var targetEl = event.target;
+    
+    // if edit button clicked / else if delete button clicked, return as argument
+    if (targetEl.matches(".edit-btn")) {
+        var taskId = targetEl.getAttribute("data-task-id");
+        editTask(taskId);
+    }
+    else if (targetEl.matches(".delete-btn")) {
+        var taskId = targetEl.getAttribute("data-task-id");
+        deleteTask(taskId);
+    }    
+};
+
+// function to delete a task based on taskId as argument from taskButtonHandler()
+var deleteTask = function(taskId) {
+    // get task list element matching task-item class with attribute data-task-id, apply taskId, remove
+    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+    taskSelected.remove();
+    };
+
+// function to edit a task, with taskId as argument from taskButtonHandler()
+var editTask = function(taskId) {
+    // get task list element matching task-item class with attribute data-task-id, apply taskId
+    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+    
+    // get content from task name and type, searching only within taskSelected element
+    var taskName = taskSelected.querySelector("h3.task-name").textContent;
+    var taskType = taskSelected.querySelector("span.task-type").textContent;
+
+    document.querySelector("input[name='task-name']").value = taskName;
+    document.querySelector("select[name='task-type']").value = taskType;
+    
+    // change #save-task button to "Save Task" from "Add Task" to show a user is in edit mode
+    document.querySelector("#save-task").textContent = "Save Task";
+
+    formEl.setAttribute("data-task-id", taskId);
+};
+
+pageContentEl.addEventListener("click", taskButtonHandler);
 
 // submit event on form that calls back the taskFormHandler function
 formEl.addEventListener("submit", taskFormHandler);
