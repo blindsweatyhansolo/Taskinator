@@ -6,7 +6,7 @@ var tasksInProgressEl = document.querySelector("#tasks-in-progress");
 var tasksCompletedEl = document.querySelector("#tasks-completed");
 var pageContentEl = document.querySelector("#page-content");
 
-// (empty) array of task objects, filled in with 
+// (empty) array to hold tasks for saving 
 var tasks = [];
 
 // function to collect form's values, package into an object, and pass into createTaskEl function on SUBMIT
@@ -105,10 +105,13 @@ var createTaskActions = function(taskId) {
     statusSelectEl.className = "select-status";
     statusSelectEl.setAttribute("name", "status-change");
     statusSelectEl.setAttribute("data-task-id", taskId);
+    // add new select element to container
+    actionContainerEl.appendChild(statusSelectEl);
     
     // create (option) array for dropdown, use for loop to create new option with text
     // and attributes, then append to (select) status dropdown
     var statusChoices = ["To Do", "In Progress", "Completed"];
+
     for (var i = 0; i < statusChoices.length; i++) {
         //create option element
         var statusOptionEl = document.createElement("option");
@@ -118,11 +121,7 @@ var createTaskActions = function(taskId) {
         statusSelectEl.appendChild(statusOptionEl);
     }
 
-    // add new select element to container
-    actionContainerEl.appendChild(statusSelectEl);
-
     return actionContainerEl;
-
 };
 
 // function to edit task
@@ -143,14 +142,15 @@ var completeEditTask = function(taskName, taskType, taskId) {
             tasks[i].type = taskType;
         }
     };
+    
+    // alert success, reset form
+    alert("Task updated!");
+
+    formEl.removeAttribute("data-task-id");
+    formEl.querySelector("#save-task").textContent = "Add Task";
 
     // call function to save task to localStorage
     saveTasks();
-
-    // alert success, reset form
-    alert("Task updated!");
-    formEl.removeAttribute("data-task-id");
-    document.querySelector("#save-task").textContent = "Add Task";
 };
 
 // function to match edit or delete element when a button is targeted, by way
@@ -175,12 +175,12 @@ var taskButtonHandler = function(event) {
 var taskStatusChangeHandler = function(event) {
     // get task items id
     var taskId = event.target.getAttribute("data-task-id");
+    
+    // find parent task item element based on the id
+    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId  + "']");
 
     // get currently selected options value, convert to lowercase (for future-proofing)
     var statusValue = event.target.value.toLowerCase();
-
-    // find parent task item element based on the id
-    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId  + "']");
 
     // based on selected option value, moves taskSelected item to appropriate container
     if (statusValue === "to do") {
@@ -213,14 +213,14 @@ var editTask = function(taskId) {
     var taskName = taskSelected.querySelector("h3.task-name").textContent;
     var taskType = taskSelected.querySelector("span.task-type").textContent;
 
+    // write values of taskName and taskType to form to be edited
     document.querySelector("input[name='task-name']").value = taskName;
     document.querySelector("select[name='task-type']").value = taskType;
     
-    // change #save-task button to "Save Task" from "Add Task" to show a user is in edit mode
-    document.querySelector("#save-task").textContent = "Save Task";
-
     // load task's attributes to form to show which task is being edited
     formEl.setAttribute("data-task-id", taskId);
+    // change #save-task button to "Save Task" from "Add Task" to show a user is in edit mode
+    formEl.querySelector("#save-task").textContent = "Save Task";
 };
 
 // function to delete a task based on taskId as argument from taskButtonHandler()
@@ -250,16 +250,19 @@ var deleteTask = function(taskId) {
 // change task values to strings with JSON.stringify()
 var saveTasks = function() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
-}
+};
 
 // function to load tasks from localStorage, convert from strings with JSON.parse()
 var loadTasks = function() {
     var savedTasks = localStorage.getItem("tasks");
 
+    // if there are no tasks, set tasks to an empty array and return out of function
     if (!savedTasks) {
         return false;
     }
-    
+    console.log("Saved tasks found!");
+
+    // parse into array of objects    
     savedTasks = JSON.parse(savedTasks);
 
     // loop through savedTasks array, pass each task object into createTaskEl()
@@ -276,3 +279,5 @@ pageContentEl.addEventListener("click", taskButtonHandler);
 
 // event listener for status changes that calls taskStatusChangeHandler() on CHANGE
 pageContentEl.addEventListener("change", taskStatusChangeHandler);
+
+loadTasks();
