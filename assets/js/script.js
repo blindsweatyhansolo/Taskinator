@@ -247,9 +247,26 @@ var deleteTask = function(taskId) {
 };
   
 // function to save tasks to localStorage, executes everytime a task is added, updated or deleted
+// change task values to strings with JSON.stringify()
 var saveTasks = function() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
 }
+
+// function to load tasks from localStorage, convert from strings with JSON.parse()
+var loadTasks = function() {
+    var savedTasks = localStorage.getItem("tasks");
+
+    if (!savedTasks) {
+        return false;
+    }
+    
+    savedTasks = JSON.parse(savedTasks);
+
+    // loop through savedTasks array, pass each task object into createTaskEl()
+    for (var i = 0; i < savedTasks.length; i++) {
+        createTaskEl(savedTasks[i]);
+    }
+};
 
 // create new task on SUBMIT event on form that calls taskFormHandler()
 formEl.addEventListener("submit", taskFormHandler);
