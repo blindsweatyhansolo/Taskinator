@@ -2,6 +2,8 @@ var taskIdCounter = 0;
 // create variables by searching their matching id names in the DOM
 var formEl = document.querySelector("#task-form");
 var tasksToDoEl = document.querySelector("#tasks-to-do");
+var tasksInProgressEl = document.querySelector("#tasks-in-progress");
+var tasksCompletedEl = document.querySelector("#tasks-completed");
 var pageContentEl = document.querySelector("#page-content");
 
 // function to collect form's values, package into an object, and pass into createTaskEl function on SUBMIT
@@ -144,12 +146,29 @@ var taskButtonHandler = function(event) {
     }    
 };
 
-// function to delete a task based on taskId as argument from taskButtonHandler()
-var deleteTask = function(taskId) {
-    // get task list element matching task-item class with attribute data-task-id, apply taskId, remove
-    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
-    taskSelected.remove();
-    };
+// function to / with [change] event as argument
+var taskStatusChangeHandler = function(event) {
+    // get task items id
+    var taskId = event.target.getAttribute("data-task-id");
+
+    // get currently selected options value, convert to lowercase (for future-proofing)
+    var statusValue = event.target.value.toLowerCase();
+
+    // find parent task item element based on the id
+    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId  + "']");
+
+    // based on selected option value, moves taskSelected item to appropriate container
+    if (statusValue === "to do") {
+        tasksToDoEl.appendChild(taskSelected);
+    }
+    else if (statusValue === "in progress") {
+        tasksInProgressEl.appendChild(taskSelected);
+    }
+    else if (statusValue === "completed") {
+        tasksCompletedEl.appendChild(taskSelected);
+    }
+
+};
 
 // function to edit a task, with taskId as argument from taskButtonHandler()
 var editTask = function(taskId) {
@@ -170,7 +189,18 @@ var editTask = function(taskId) {
     formEl.setAttribute("data-task-id", taskId);
 };
 
+// function to delete a task based on taskId as argument from taskButtonHandler()
+var deleteTask = function(taskId) {
+    // get task list element matching task-item class with attribute data-task-id, apply taskId, remove
+    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+    taskSelected.remove();
+    };
+    
+// create new task on SUBMIT event on form that calls taskFormHandler()
+formEl.addEventListener("submit", taskFormHandler);
+
+// event listener for edit and delete buttons that calls taskButtonHandler() on CLICK
 pageContentEl.addEventListener("click", taskButtonHandler);
 
-// submit event on form that calls back the taskFormHandler function
-formEl.addEventListener("submit", taskFormHandler);
+// event listener for status changes that calls taskStatusChangeHandler() on CHANGE
+pageContentEl.addEventListener("change", taskStatusChangeHandler);
